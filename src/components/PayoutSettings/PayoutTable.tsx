@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 import { Download } from 'lucide-react';
@@ -10,25 +10,42 @@ const PayoutTable = () => {
   const { globalPayoutRate } = useSelector((state: RootState) => state.payout);
   const dispatch = useDispatch();
 
-  const filteredArticles = articles.filter(article => {
-    if (filters.author && article.author !== filters.author) return false;
-    if (filters.type !== 'All' && article.type !== filters.type) return false;
-    if (filters.dateRange.start && new Date(article.date) < new Date(filters.dateRange.start)) return false;
-    if (filters.dateRange.end && new Date(article.date) > new Date(filters.dateRange.end)) return false;
-    return true;
-  });
+  // Filter articles based on the active filters
+  const filteredArticles = useMemo(() => {
+    return articles.filter(article => {
+      // Filter by author(s)
+      if (filters.authors.length > 0 && !filters.authors.includes(article.author || '')) return false;
+      
+      // Filter by type (News/Blog)
+      if (filters.types.length > 0 && !filters.types.includes(article.type)) return false;
+      
+      // Filter by date range
+      if (filters.dateRange.start && new Date(article.publishedAt) < new Date(filters.dateRange.start)) return false;
+      if (filters.dateRange.end && new Date(article.publishedAt) > new Date(filters.dateRange.end)) return false;
+      
+      // Filter by search query (article title or description)
+      if (filters.searchQuery && !article.title.toLowerCase().includes(filters.searchQuery.toLowerCase()) && !article.description?.toLowerCase().includes(filters.searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [articles, filters]);
 
-  const authorStats = filteredArticles.reduce((acc: { [key: string]: number }, article) => {
-    acc[article.author] = (acc[article.author] || 0) + 1;
-    return acc;
-  }, {});
+  // Author stats calculation based on filtered articles
+  const authorStats = useMemo(() => {
+    return filteredArticles.reduce((acc: { [key: string]: number }, article) => {
+      acc[article.author || 'Unknown'] = (acc[article.author || 'Unknown'] || 0) + 1;
+      return acc;
+    }, {});
+  }, [filteredArticles]);
 
   const handleExport = (format: 'pdf' | 'csv' | 'sheets') => {
     const data = Object.entries(authorStats).map(([author, count]) => ({
       author,
       articles: count,
       payoutRate: globalPayoutRate,
-      totalPayout: count * globalPayoutRate
+      totalPayout: count * globalPayoutRate,
     }));
 
     switch (format) {

@@ -1,22 +1,22 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface FilterState {
-  author: string | null;
+  authors: string[];  // Changed from single author to array
   dateRange: {
     start: string | null;
     end: string | null;
   };
-  type: 'All' | 'News' | 'Blog';
+  types: string[];  // Changed from single type to array
   searchQuery: string;
 }
 
 const initialState: FilterState = {
-  author: null,
+  authors: [],
   dateRange: {
     start: null,
     end: null,
   },
-  type: 'All',
+  types: [],
   searchQuery: '',
 };
 
@@ -24,31 +24,31 @@ const filterSlice = createSlice({
   name: 'filter',
   initialState,
   reducers: {
-    setAuthorFilter: (state, action: PayloadAction<string | null>) => {
-      state.author = action.payload;
+    setAuthorFilters: (state, action: PayloadAction<string[]>) => {
+      state.authors = action.payload;
     },
     setDateRange: (state, action: PayloadAction<{ start: string | null; end: string | null }>) => {
       state.dateRange = action.payload;
     },
-    setTypeFilter: (state, action: PayloadAction<'All' | 'News' | 'Blog'>) => {
-      state.type = action.payload;
+    setTypeFilters: (state, action: PayloadAction<string[]>) => {
+      state.types = action.payload;
     },
     setSearchQuery: (state, action: PayloadAction<string>) => {
       state.searchQuery = action.payload;
     },
     clearFilters: (state) => {
-      state.author = null;
+      state.authors = [];
       state.dateRange = { start: null, end: null };
-      state.type = 'All';
+      state.types = [];
       state.searchQuery = '';
     },
   },
 });
 
 export const {
-  setAuthorFilter,
+  setAuthorFilters,
   setDateRange,
-  setTypeFilter,
+  setTypeFilters,
   setSearchQuery,
   clearFilters,
 } = filterSlice.actions;

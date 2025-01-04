@@ -32,10 +32,43 @@ const Statistics = () => {
   const filters = useSelector((state: RootState) => state.filter);
 
   const filteredArticles = articles.filter(article => {
-    if (filters.author && article.author !== filters.author) return false;
-    if (filters.type !== 'All' && article.type !== filters.type) return false;
-    if (filters.dateRange.start && new Date(article.date) < new Date(filters.dateRange.start)) return false;
-    if (filters.dateRange.end && new Date(article.date) > new Date(filters.dateRange.end)) return false;
+    // Search query filter
+    if (filters.searchQuery) {
+      const searchLower = filters.searchQuery.toLowerCase();
+      const matchesSearch = 
+        article.title?.toLowerCase().includes(searchLower) ||
+        article.description?.toLowerCase().includes(searchLower) ||
+        article.author?.toLowerCase().includes(searchLower);
+      if (!matchesSearch) return false;
+    }
+
+    // Multiple authors filter
+    if (filters.authors.length > 0) {
+      if (!article.author || !filters.authors.includes(article.author)) {
+        return false;
+      }
+    }
+
+    // Date range filter
+    if (filters.dateRange.start || filters.dateRange.end) {
+      const articleDate = new Date(article.publishedAt);
+      if (filters.dateRange.start && articleDate < new Date(filters.dateRange.start)) {
+        return false;
+      }
+      if (filters.dateRange.end && articleDate > new Date(filters.dateRange.end)) {
+        return false;
+      }
+    }
+
+    // Multiple types filter
+    if (filters.types.length > 0) {
+      const isNews = article.source?.toLowerCase().includes('news');
+      const type = isNews ? 'News' : 'Blog';
+      if (!filters.types.includes(type)) {
+        return false;
+      }
+    }
+
     return true;
   });
 
@@ -44,8 +77,8 @@ const Statistics = () => {
     labels: ['News', 'Blog'],
     datasets: [{
       data: [
-        filteredArticles.filter(a => a.type === 'News').length,
-        filteredArticles.filter(a => a.type === 'Blog').length,
+        filteredArticles.filter(a => a.source?.toLowerCase().includes('news')).length,
+        filteredArticles.filter(a => !a.source?.toLowerCase().includes('news')).length,
       ],
       backgroundColor: ['#3B82F6', '#10B981'],
     }],
@@ -53,7 +86,8 @@ const Statistics = () => {
 
   // Author distribution data
   const authorStats = filteredArticles.reduce((acc: { [key: string]: number }, article) => {
-    acc[article.author] = (acc[article.author] || 0) + 1;
+    const author = article.author || 'Unknown';
+    acc[author] = (acc[author] || 0) + 1;
     return acc;
   }, {});
 
@@ -68,7 +102,7 @@ const Statistics = () => {
 
   // Time trend data
   const timeStats = filteredArticles.reduce((acc: { [key: string]: number }, article) => {
-    const date = new Date(article.date).toLocaleDateString();
+    const date = new Date(article.publishedAt).toLocaleDateString();
     acc[date] = (acc[date] || 0) + 1;
     return acc;
   }, {});

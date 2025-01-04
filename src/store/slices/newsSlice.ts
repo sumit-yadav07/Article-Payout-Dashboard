@@ -3,7 +3,7 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 interface Article {
   id: string;
   title: string;
-  author: string | null; // Include author
+  author: string | null;
   source: string;
   description: string;
   publishedAt: string;
@@ -23,7 +23,6 @@ const initialState: NewsState = {
   error: null,
 };
 
-// Fetch articles from NewsAPI
 export const fetchArticles = createAsyncThunk(
   'news/fetchArticles',
   async (apiKey: string) => {
@@ -37,7 +36,7 @@ export const fetchArticles = createAsyncThunk(
     }
 
     return data.articles.map((article: any) => ({
-      id: article.url, // Use URL as a unique ID
+      id: article.url,
       title: article.title,
       author: article.author,
       source: article.source.name,
