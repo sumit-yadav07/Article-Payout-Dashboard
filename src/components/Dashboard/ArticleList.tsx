@@ -1,44 +1,44 @@
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
-import { FileText, Newspaper } from 'lucide-react';
+import { useSelector, useDispatch } from 'react-redux';
+import { useEffect } from 'react';
+import { RootState, AppDispatch } from '../../store/store';
+import { fetchArticles } from '../../store/slices/newsSlice';
 
 const ArticleList = () => {
-  const { articles } = useSelector((state: RootState) => state.news);
-  const filters = useSelector((state: RootState) => state.filter);
+  const { articles, loading, error } = useSelector((state: RootState) => state.news);
+  const dispatch = useDispatch<AppDispatch>();
 
-  const filteredArticles = articles.filter(article => {
-    if (filters.author && article.author !== filters.author) return false;
-    if (filters.type !== 'All' && article.type !== filters.type) return false;
-    if (filters.dateRange.start && new Date(article.date) < new Date(filters.dateRange.start)) return false;
-    if (filters.dateRange.end && new Date(article.date) > new Date(filters.dateRange.end)) return false;
-    if (filters.searchQuery && !article.title.toLowerCase().includes(filters.searchQuery.toLowerCase())) return false;
-    return true;
-  });
+  useEffect(() => {
+    const apiKey = 'ead002b4de73470084cec979e824f9c8'; // NewsAPI key
+    dispatch(fetchArticles(apiKey)); // Dispatch the thunk with the API key
+  }, [dispatch]);
+
+  if (loading) return <div>Loading articles...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filteredArticles.map(article => (
+      {articles.map((article) => (
         <div key={article.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4">
-          <div className="flex items-center gap-2 mb-2">
-            {article.type === 'News' ? (
-              <Newspaper className="text-blue-500" size={20} />
-            ) : (
-              <FileText className="text-green-500" size={20} />
-            )}
-            <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-              {article.type}
-            </span>
-          </div>
-          
-          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
+          {article.urlToImage && (
+            <img
+              src={article.urlToImage}
+              alt={article.title}
+              className="w-full h-48 object-cover rounded-lg mb-4"
+            />
+          )}
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">
             {article.title}
           </h3>
-          
-          <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-            <span>{article.author}</span>
-            <span>{new Date(article.date).toLocaleDateString()}</span>
-          </div>
-          
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>Author:</strong> {article.author || 'Unknown'}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>Source:</strong> {article.source}
+          </p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{article.description}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            <strong>Published:</strong> {new Date(article.publishedAt).toLocaleString()}
+          </p>
           <a
             href={article.url}
             target="_blank"
