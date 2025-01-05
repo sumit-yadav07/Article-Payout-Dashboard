@@ -1,4 +1,3 @@
-import React from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import {
@@ -75,13 +74,15 @@ const Statistics = () => {
   // Type distribution data
   const typeData = {
     labels: ['News', 'Blog'],
-    datasets: [{
-      data: [
-        filteredArticles.filter(a => a.source?.toLowerCase().includes('news')).length,
-        filteredArticles.filter(a => !a.source?.toLowerCase().includes('news')).length,
-      ],
-      backgroundColor: ['#3B82F6', '#10B981'],
-    }],
+    datasets: [
+      {
+        data: [
+          filteredArticles.filter(a => a.source?.toLowerCase().includes('news')).length,
+          filteredArticles.filter(a => !a.source?.toLowerCase().includes('news')).length,
+        ],
+        backgroundColor: ['#3B82F6', '#10B981'],
+      },
+    ],
   };
 
   // Author distribution data
@@ -93,11 +94,13 @@ const Statistics = () => {
 
   const authorData = {
     labels: Object.keys(authorStats),
-    datasets: [{
-      label: 'Articles per Author',
-      data: Object.values(authorStats),
-      backgroundColor: '#3B82F6',
-    }],
+    datasets: [
+      {
+        label: 'Articles per Author',
+        data: Object.values(authorStats),
+        backgroundColor: '#3B82F6',
+      },
+    ],
   };
 
   // Time trend data
@@ -109,45 +112,61 @@ const Statistics = () => {
 
   const timeData = {
     labels: Object.keys(timeStats),
-    datasets: [{
-      label: 'Articles over Time',
-      data: Object.values(timeStats),
-      borderColor: '#3B82F6',
-      tension: 0.1,
-    }],
+    datasets: [
+      {
+        label: 'Articles over Time',
+        data: Object.values(timeStats),
+        borderColor: '#3B82F6',
+        tension: 0.1,
+      },
+    ],
   };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Content Type Distribution</h3>
-        <Pie data={typeData} options={{ responsive: true }} />
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+          Content Type Distribution
+        </h3>
+        <div style={{ width: '250px', height: '250px', margin: '0 auto' }}>
+          <Pie data={typeData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Articles by Author</h3>
-        <Bar
-          data={authorData}
-          options={{
-            responsive: true,
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }}
-        />
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+          Articles by Author
+        </h3>
+        <div style={{ width: '300px', height: '250px', margin: '0 auto' }}>
+          <Bar
+            data={authorData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true },
+              },
+            }}
+          />
+        </div>
       </div>
 
       <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md md:col-span-2">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Publication Trend</h3>
-        <Line
-          data={timeData}
-          options={{
-            responsive: true,
-            scales: {
-              y: { beginAtZero: true }
-            }
-          }}
-        />
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+          Publication Trend
+        </h3>
+        <div style={{ width: '600px', height: '250px', margin: '0 auto' }}>
+          <Line
+            data={timeData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                y: { beginAtZero: true },
+              },
+            }}
+          />
+        </div>
       </div>
     </div>
   );

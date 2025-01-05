@@ -1,17 +1,24 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { clearUser } from '../../store/slices/authSlice';
 import { LogOut, Settings, LayoutDashboard } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import { account } from '../../config/appwrite';
+
 
 const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession('current');
+      dispatch(clearUser());
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:');
+    }
+    
   };
 
   return (
@@ -19,7 +26,7 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">SportDunia</h1>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">NewsDunia</h1>
           </div>
 
           <div className="flex items-center space-x-4">

@@ -9,8 +9,8 @@ const ArticleList = () => {
   const dispatch = useDispatch<AppDispatch>();
 
   useEffect(() => {
-    const apiKey = 'ead002b4de73470084cec979e824f9c8';
-    dispatch(fetchArticles(apiKey));
+    const apiKey = "process.env.REACT_APP_NEWS_API_KEY";
+    dispatch(fetchArticles(apiKey as string));
   }, [dispatch]);
 
   const filteredArticles = useMemo(() => {

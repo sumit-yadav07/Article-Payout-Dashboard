@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setLoading } from '../store/slices/authSlice';
 import { account } from '../config/appwrite';
 import { UserPlus } from 'lucide-react';
+import { ID } from 'appwrite';
 
 const Signup = () => {
   const [name, setName] = useState('');
@@ -9,14 +12,27 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    dispatch(setLoading(true));
+    
     try {
-      await account.create('unique()', email, password, name);
-      navigate('/login');
-    } catch (err) {
-      setError('Failed to create account');
+      await account.create(
+        ID.unique(),
+        email,
+        password,
+        name
+      );
+      
+      // Automatically log in after successful signup
+      await account.createEmailSession(email, password);
+      navigate('/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Failed to create account');
+    } finally {
+      dispatch(setLoading(false));
     }
   };
 
@@ -40,7 +56,7 @@ const Signup = () => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
           </div>
@@ -53,7 +69,7 @@ const Signup = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
           </div>
@@ -66,7 +82,7 @@ const Signup = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               required
             />
           </div>
